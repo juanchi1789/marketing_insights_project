@@ -88,7 +88,7 @@ marketing_insights_project/
 │   └── utils.py        # Reusable helper functions
 │
 ├── docs/
-│   └── notes.md
+│   └── Theory.md
 │
 ├── README.md
 └── .gitignore
