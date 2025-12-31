@@ -1,6 +1,5 @@
 # Theoretical Framework
 
----
 
 ## 1. Introduction and Scope
 
