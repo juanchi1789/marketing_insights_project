@@ -284,7 +284,7 @@ Descriptive statistics summarize observed data, while causal analysis seeks to e
 The expectation operator serves as the conceptual bridge between these two perspectives, enabling formal definitions of treatment effects and incremental impact, which will be developed in subsequent sections.
 
 ---
-### 2.7 Distributions (with mathematical formulations)
+### 2.7 Distributions
 
 A distribution characterizes how a random variable can take values. In practice, distributions help us:
 - model uncertainty,
@@ -400,7 +400,7 @@ $$
 
 #### 2.7.5 Poisson Distribution (Counts)
 
-Counts such as clicks or events per time unit are often modeled with a Poisson distribution.
+Counts like events per time unit are often modeled with a Poisson distribution.
 
 Notation:
 
@@ -473,4 +473,7 @@ These properties affect:
 - interpretation of averages,
 - robustness of statistical tests,
 - modeling choices (e.g., transformations, robust estimators, or alternative likelihoods).
+
+---
+### 3. Correlation vs Causation
 
