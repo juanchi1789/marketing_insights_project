@@ -67,6 +67,11 @@ This repository will progressively include notebooks and experiments related to:
 
 ---
 
+Raw datasets are not included in this repository.
+
+---
+
+
 ## Project Structure
 
 ```text
