@@ -1,27 +1,27 @@
 # Modelo de Marketing Mix (MMM) desde cero
 
-Este documento introduce el modelo estadistico de Marketing Mix desde fundamentos matematicos y en notacion LaTeX, con ejemplos sencillos para construir intuicion.
+Este documento introduce el modelo estadistico de Marketing Mix desde fundamentos matematicos y en notacion LaTeX, con ejemplos sencillos para construir intuicion. La idea es explicar los conceptos con lenguaje accesible para alguien con base en matematicas y estadistica, pero sin necesidad de experiencia previa en marketing.
 
 ## 0. Motivacion y alcance
 
-El MMM busca cuantificar como distintas palancas (medios, precio, promociones, distribucion) impactan un KPI (ventas, ingresos, leads). Se usa para:
+El MMM busca cuantificar como distintas palancas (medios, precio, promociones, distribucion) impactan un KPI (ventas, ingresos, leads). En terminos simples, intenta responder: "si aumento el gasto en un canal, cuanto cambia el resultado?". Se usa para:
 
 - Medir contribuciones por canal.
 - Estimar elasticidades y ROI.
 - Simular escenarios de presupuesto.
 
-No es un modelo causal perfecto por si solo: depende de la calidad de los datos, del diseno temporal y de supuestos econometricos.
+No es un modelo causal perfecto por si solo: depende de la calidad de los datos, del diseno temporal y de supuestos econometricos. Sirve para guiar decisiones, pero se complementa con experimentos de lift y conocimiento del negocio.
 
 ## 1. Planteamiento del problema
 
-Sea $t = 1, \dots, T$ el indice temporal. Observamos una serie de resultados de negocio (por ejemplo, ventas o ingresos) $y_t \in \mathbb{R}$ y un conjunto de variables explicativas asociadas a acciones de marketing y control. El objetivo es estimar el efecto causal promedio de dichas acciones sobre $y_t$ y construir un modelo para prediccion y descomposicion de contribuciones.
+Sea $t = 1, \dots, T$ el indice temporal. Observamos una serie de resultados de negocio (por ejemplo, ventas o ingresos) $y_t \in \mathbb{R}$ y un conjunto de variables explicativas asociadas a acciones de marketing y control. El objetivo es estimar el efecto promedio de dichas acciones sobre $y_t$ y construir un modelo para prediccion y descomposicion de contribuciones. En la practica, cada observacion $t$ puede ser una semana o un mes.
 
 Definimos un vector de covariables $\mathbf{x}_t \in \mathbb{R}^p$ que incluye:
 
 - Variables de marketing (inversion en medios, promociones, precios).
 - Variables de control (estacionalidad, tendencia, clima, eventos).
 
-El enfoque MMM clasico es un modelo de regresion lineal con transformaciones que capturan efectos no lineales (adstock, saturacion) en los canales de marketing.
+El enfoque MMM clasico es un modelo de regresion lineal con transformaciones que capturan efectos no lineales (adstock, saturacion) en los canales de marketing. Estas transformaciones reflejan dos ideas intuitivas: los efectos se acumulan en el tiempo y, a altos niveles de inversion, el impacto marginal disminuye.
 
 ## 1.1 Preparacion de datos
 
@@ -32,7 +32,7 @@ Antes del modelado, es critico:
 - Tratar outliers y faltantes de manera consistente.
 - Alinear fechas de campanas y ventas (lag de reportes).
 
-Una mala alineacion temporal suele ser la principal causa de coeficientes poco interpretable.
+Una mala alineacion temporal suele ser la principal causa de coeficientes poco interpretables. Por ejemplo, si las ventas se reportan con retraso, el modelo puede asignar el efecto al mes equivocado.
 
 ## 2. Modelo lineal base
 
@@ -42,7 +42,7 @@ El modelo base es
  y_t = \beta_0 + \sum_{j=1}^p \beta_j x_{t,j} + \varepsilon_t,
 \]
 
-con $\varepsilon_t \sim \mathcal{N}(0, \sigma^2)$ i.i.d. o con estructura temporal especifica.
+con $\varepsilon_t \sim \mathcal{N}(0, \sigma^2)$ i.i.d. o con estructura temporal especifica. Aqui, cada $\beta_j$ es el cambio promedio en $y_t$ por unidad de $x_{t,j}$, manteniendo constantes las otras variables.
 
 En forma matricial, si $\mathbf{y} \in \mathbb{R}^T$, $\mathbf{X} \in \mathbb{R}^{T \times p}$, entonces
 
@@ -62,7 +62,7 @@ asumiendo rango completo.
 
 ### 3.1 Adstock (carryover)
 
-La respuesta a la inversion no suele ser inmediata. Se modela el efecto rezagado con una transformacion adstock para cada canal $j$:
+La respuesta a la inversion no suele ser inmediata. Se modela el efecto rezagado con una transformacion adstock para cada canal $j$. Intuitivamente, un anuncio visto hoy puede influir en una compra en dias posteriores:
 
 \[
  s_{t,j} = x_{t,j} + \lambda_j s_{t-1,j}, \quad 0 \le \lambda_j < 1,
@@ -76,7 +76,7 @@ con $s_{0,j} = 0$. En forma cerrada:
 
 ### 3.2 Saturacion (rendimientos decrecientes)
 
-Se modela con una funcion concava, por ejemplo una transformacion tipo Hill:
+Se modela con una funcion concava, por ejemplo una transformacion tipo Hill. Esta forma captura rendimientos decrecientes: al principio, cada peso adicional mueve mucho el resultado, pero luego cada peso extra aporta menos.
 
 \[
  f_j(s_{t,j}) = \frac{s_{t,j}^{\alpha_j}}{s_{t,j}^{\alpha_j} + \theta_j^{\alpha_j}}, \quad \alpha_j, \theta_j > 0.
@@ -92,7 +92,7 @@ Algunas implementaciones usan:
 - Michaelis-Menten: $f(s) = \frac{s}{s + \theta}$.
 - Softplus: $f(s) = \log(1 + e^{s})$ (con escalamiento).
 
-La eleccion depende del tipo de canal y del rango de inversion.
+La eleccion depende del tipo de canal y del rango de inversion. En canales digitales suele observarse saturacion mas rapida que en canales de alto alcance como TV.
 
 ## 4. Modelo MMM con transformaciones
 
@@ -114,7 +114,7 @@ En notacion compacta:
  y_t = \beta_0 + \sum_{j=1}^{m} \beta_j g_j(x_{1:t,j}; \lambda_j, \alpha_j, \theta_j) + \sum_{k=1}^{q} \gamma_k z_{t,k} + \varepsilon_t,
 \]
 
-con $g_j$ la composicion adstock + saturacion.
+con $g_j$ la composicion adstock + saturacion. En palabras simples, primero se acumula el efecto en el tiempo (adstock) y luego se aplica una curva de rendimientos decrecientes (saturacion).
 
 ## 4.1 Tendencia, estacionalidad y calendario
 
@@ -144,11 +144,11 @@ La estimacion puede hacerse por maximizacion de la log-verosimilitud:
  \ell(\Theta) = -\frac{T}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{t=1}^T (y_t - \hat{y}_t)^2.
 \]
 
-Debido a la no linealidad en $\lambda_j$, $\alpha_j$, $\theta_j$, suele usarse optimizacion numerica (por ejemplo, gradiente o metodos cuasi-Newton) o un enfoque Bayesiano con MCMC.
+Debido a la no linealidad en $\lambda_j$, $\alpha_j$, $\theta_j$, suele usarse optimizacion numerica (por ejemplo, gradiente o metodos cuasi-Newton) o un enfoque Bayesiano con MCMC. En la practica, esto significa buscar los parametros que mejor expliquen los datos observados.
 
 ## 5.1 Regularizacion
 
-Cuando hay muchos canales o alta colinealidad, se usa regularizacion:
+Cuando hay muchos canales o alta colinealidad, se usa regularizacion. Esto evita que el modelo asigne efectos extremos a un canal solo por ruido en los datos:
 
 - Ridge: penaliza $\|\boldsymbol{\beta}\|_2^2$.
 - Lasso: penaliza $\|\boldsymbol{\beta}\|_1$.
@@ -184,19 +184,19 @@ Con $f_j$ tipo Hill,
 
 ## 6.1 ROI y elasticidades
 
-El ROI incremental aproximado para un periodo se puede definir como:
+En marketing, ROI (Return on Investment) mide cuanta ganancia se obtiene por cada unidad monetaria invertida. En un MMM, el ROI incremental aproximado para un periodo se puede definir como:
 
 \[
  \text{ROI}_j = \frac{\Delta y_t}{\Delta x_{t,j}}.
 \]
 
-En modelos con logaritmos (log-log), el coeficiente es una elasticidad:
+Si el KPI se mide en dinero, es comun convertir el lift estimado a ROI dividiendo por el gasto del canal. En modelos con logaritmos (log-log), el coeficiente es una elasticidad:
 
 \[
  \log(y_t) = \beta_0 + \beta_j \log(x_{t,j}) + \cdots,
 \]
 
-entonces $\beta_j$ mide el cambio porcentual en $y_t$ ante un cambio porcentual en $x_{t,j}$.
+entonces $\beta_j$ mide el cambio porcentual en $y_t$ ante un cambio porcentual en $x_{t,j}$. Esto es util para comparar canales con escalas distintas.
 
 ## 7. Descomposicion de contribuciones
 
@@ -212,11 +212,11 @@ Entonces
  y_t \approx \beta_0 + \sum_{j=1}^{m} c_{t,j} + \sum_{k=1}^{q} \gamma_k z_{t,k}.
 \]
 
-Esto permite reportar el aporte relativo de cada canal en un periodo.
+Esto permite reportar el aporte relativo de cada canal en un periodo. En reportes ejecutivos, suele mostrarse como porcentaje del total explicado por marketing.
 
 ## 7.1 Baseline y lift
 
-Se define el baseline como el valor esperado sin marketing:
+Se define el baseline como el valor esperado sin marketing. Conceptualmente, es lo que se esperaria vender solo por tendencia, estacionalidad y factores externos:
 
 \[
  \hat{y}_t^{\text{base}} = \beta_0 + \sum_k \gamma_k z_{t,k}.
@@ -228,7 +228,7 @@ El lift de marketing es:
  \hat{y}_t^{\text{lift}} = \sum_j \beta_j f_j(s_{t,j}).
 \]
 
-Esto ayuda a separar crecimiento organico vs. incremental.
+Esto ayuda a separar crecimiento organico vs. incremental. Es clave para evitar atribuir ventas naturales al gasto de medios.
 
 ## 8. Limitaciones y supuestos
 
@@ -236,6 +236,7 @@ Esto ayuda a separar crecimiento organico vs. incremental.
 - Errores independientes y homocedasticos (si no se modela autocorrelacion).
 - Posible colinealidad entre canales.
 - Identificacion limitada cuando hay pocas variaciones o alta correlacion.
+ - No captura bien efectos creativos o cambios de mensaje si no hay variables que los representen.
 
 ## 8.1 Diagnosticos recomendados
 
@@ -262,11 +263,11 @@ En un enfoque Bayesiano se fija un prior para cada parametro, por ejemplo:
  \beta_j \sim \mathcal{N}(0, \tau^2), \quad \lambda_j \sim \text{Beta}(a,b).
 \]
 
-Se obtiene una distribucion posterior que permite intervalos creibles y propagacion de incertidumbre en los reportes.
+Se obtiene una distribucion posterior que permite intervalos creibles y propagacion de incertidumbre en los reportes. Esto es util para comunicar rangos y no solo un numero puntual.
 
 ## 10. Conclusion
 
-El MMM es un modelo estadistico estructurado que combina regresion con transformaciones que capturan memoria y saturacion de las inversiones en marketing. Su formulacion matematica permite estimar impactos, realizar descomposiciones y construir escenarios de optimizacion.
+El MMM es un modelo estadistico estructurado que combina regresion con transformaciones que capturan memoria y saturacion de las inversiones en marketing. Su formulacion matematica permite estimar impactos, realizar descomposiciones y construir escenarios de optimizacion. Es especialmente util cuando no se pueden correr experimentos en todos los canales.
 
 ## 10.1 Flujo practico de trabajo
 
@@ -295,7 +296,7 @@ Si $\beta_0 = 100$ y $\beta_1 = 2$, entonces un gasto de $x_t = 10$ implica
  \hat{y}_t = 100 + 2 \cdot 10 = 120.
 \]
 
-Interpretacion: cada unidad adicional de gasto aumenta ventas en aproximadamente 2 unidades, manteniendo todo lo demas constante.
+Interpretacion: cada unidad adicional de gasto aumenta ventas en aproximadamente 2 unidades, manteniendo todo lo demas constante. En un KPI monetario, esto puede leerse como un ROI marginal de 2.
 
 ### 11.2 Adstock con un solo canal
 
@@ -361,7 +362,7 @@ Contribuciones:
  c_{t,1} = 1.5\cdot 20 = 30, \quad c_{t,2} = 0.5\cdot 40 = 20.
 \]
 
-Interpretacion: el canal 1 explica 30 unidades y el canal 2 explica 20 unidades en ese periodo.
+Interpretacion: el canal 1 explica 30 unidades y el canal 2 explica 20 unidades en ese periodo. El restante hasta 100 se explica por la constante (baseline).
 
 ## 12. Ejemplo simple de escenario
 
